@@ -7,6 +7,7 @@ import { analyzeTicket } from '@/lib/ai-analysis';
 import { Ticket, TicketStatus } from '@/types';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import DashboardView from '@/components/Dashboard';
 import TicketList from '@/components/TicketList';
 import TicketDetail from '@/components/TicketDetail';
 import AIAssistant from '@/components/AIAssistant';
@@ -14,7 +15,7 @@ import NewTicketModal from '@/components/NewTicketModal';
 
 type FilterTab = TicketStatus | 'all';
 
-export default function Dashboard() {
+export default function HomePage() {
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>('HD-1024');
   const [activePage, setActivePage] = useState('dashboard');
@@ -82,7 +83,6 @@ export default function Dashboard() {
 
   const handleUseAnswer = (text: string) => {
     setPendingAnswer(text);
-    // Give a moment for the state to propagate, then clear
     setTimeout(() => setPendingAnswer(undefined), 500);
   };
 
@@ -94,39 +94,45 @@ export default function Dashboard() {
         <Sidebar activePage={activePage} onNavigate={setActivePage} stats={stats} />
 
         <main className="flex flex-1 overflow-hidden">
-          <TicketList
-            tickets={filteredTickets}
-            selectedTicketId={selectedTicketId}
-            onSelect={setSelectedTicketId}
-            statusFilter={statusFilter}
-            onFilterChange={setStatusFilter}
-            onNewTicket={() => setShowNewTicket(true)}
-          />
-
-          {selectedTicket && aiAnalysis ? (
-            <>
-              <TicketDetail
-                key={selectedTicket.ticket_id}
-                ticket={selectedTicket}
-                comments={ticketComments}
-                onBack={() => setSelectedTicketId(null)}
-                onStatusChange={handleStatusChange}
-                pendingAnswer={pendingAnswer}
-              />
-              <AIAssistant
-                ticket={selectedTicket}
-                analysis={aiAnalysis}
-                onUseAnswer={handleUseAnswer}
-              />
-            </>
+          {activePage === 'dashboard' ? (
+            <DashboardView tickets={tickets} />
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-400 bg-gray-50">
-              <svg className="w-16 h-16 mb-4 text-gray-200" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-              </svg>
-              <p className="text-sm font-medium text-gray-500">Pilih ticket untuk melihat detail</p>
-              <p className="text-xs text-gray-400 mt-1">Klik ticket mana saja dari daftar di sebelah kiri</p>
-            </div>
+            <>
+              <TicketList
+                tickets={filteredTickets}
+                selectedTicketId={selectedTicketId}
+                onSelect={setSelectedTicketId}
+                statusFilter={statusFilter}
+                onFilterChange={setStatusFilter}
+                onNewTicket={() => setShowNewTicket(true)}
+              />
+
+              {selectedTicket && aiAnalysis ? (
+                <>
+                  <TicketDetail
+                    key={selectedTicket.ticket_id}
+                    ticket={selectedTicket}
+                    comments={ticketComments}
+                    onBack={() => setSelectedTicketId(null)}
+                    onStatusChange={handleStatusChange}
+                    pendingAnswer={pendingAnswer}
+                  />
+                  <AIAssistant
+                    ticket={selectedTicket}
+                    analysis={aiAnalysis}
+                    onUseAnswer={handleUseAnswer}
+                  />
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-400 bg-gray-50">
+                  <svg className="w-16 h-16 mb-4 text-gray-200" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-500">Pilih ticket untuk melihat detail</p>
+                  <p className="text-xs text-gray-400 mt-1">Klik ticket mana saja dari daftar di sebelah kiri</p>
+                </div>
+              )}
+            </>
           )}
         </main>
       </div>

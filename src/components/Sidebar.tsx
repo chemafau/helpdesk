@@ -16,6 +16,7 @@ type Props = {
 const navItems = [
   { key: 'dashboard', label: 'Dashboard', icon: IconDashboard },
   { key: 'tickets', label: 'Tickets', icon: IconTicket },
+  { key: 'knowledge-base', label: 'Knowledge Base', icon: IconBook },
 ];
 
 export default function Sidebar({ activePage, onNavigate, stats }: Props) {
