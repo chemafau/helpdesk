@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { tickets as initialTickets } from '@/data/tickets';
 import { comments as allComments } from '@/data/comments';
 import { analyzeTicket } from '@/lib/ai-analysis';
+import { getSession, logout } from '@/lib/auth';
 import { Ticket, TicketStatus } from '@/types';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
@@ -16,6 +18,17 @@ import NewTicketModal from '@/components/NewTicketModal';
 type FilterTab = TicketStatus | 'all';
 
 export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!getSession()) router.replace('/login');
+  }, [router]);
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
+
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>('HD-1024');
   const [activePage, setActivePage] = useState('dashboard');
@@ -88,7 +101,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
-      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} onLogout={handleLogout} />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar activePage={activePage} onNavigate={setActivePage} stats={stats} />

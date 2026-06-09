@@ -3,9 +3,10 @@
 type Props = {
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  onLogout?: () => void;
 };
 
-export default function Header({ searchQuery, onSearchChange }: Props) {
+export default function Header({ searchQuery, onSearchChange, onLogout }: Props) {
   return (
     <header className="h-14 flex items-center gap-4 px-4 bg-white border-b border-gray-200 flex-shrink-0 z-10">
       {/* Logo */}
@@ -59,7 +60,7 @@ export default function Header({ searchQuery, onSearchChange }: Props) {
         <div className="w-px h-6 bg-gray-200 mx-1" />
 
         {/* User */}
-        <button className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+        <div className="flex items-center gap-2.5 pl-2 pr-1 py-1.5 rounded-lg">
           <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
             A
           </div>
@@ -67,10 +68,20 @@ export default function Header({ searchQuery, onSearchChange }: Props) {
             <p className="text-sm font-semibold text-gray-900 leading-tight">Admin</p>
             <p className="text-xs text-gray-500 leading-tight">Helpdesk Admin</p>
           </div>
-          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
-        </button>
+        </div>
+
+        {/* Logout */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            title="Keluar"
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+          </button>
+        )}
       </div>
     </header>
   );
