@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Ticket, AIAnalysis } from '@/types';
 import { getStatusColor } from '@/lib/utils';
+import MaldevtaChatModal from './MaldevtaChatModal';
 
 type Props = {
   ticket: Ticket;
@@ -10,9 +11,55 @@ type Props = {
   onUseAnswer?: (text: string) => void;
 };
 
-export default function AIAssistant({ ticket, analysis, onUseAnswer }: Props) {
+export default function AIAssistant({ ticket, analysis: initialAnalysis, onUseAnswer }: Props) {
   const [copied, setCopied] = useState(false);
   const [showFullAnswer, setShowFullAnswer] = useState(false);
+  const [showMaldevtaChat, setShowMaldevtaChat] = useState(false);
+  const [analysis, setAnalysis] = useState<AIAnalysis>(initialAnalysis);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset to static analysis whenever ticket changes, then fetch from Maldevta
+  useEffect(() => {
+    setAnalysis(initialAnalysis);
+    setError(null);
+
+    const fetchAnalysis = async () => {
+      setLoading(true);
+
+      try {
+        const relatedSOPs = initialAnalysis.relatedSOPs.map((s) => `${s.title}: ${s.content}`).join('\n\n');
+        const similarTicketsSummary = initialAnalysis.similarTickets
+          .map((t) => `${t.ticket_id}: ${t.title} (${t.status})`)
+          .join('\n');
+
+        const prompt = `Kamu adalah AI assistant helpdesk. Analisis tiket berikut dan berikan rekomendasi jawaban dalam Bahasa Indonesia yang jelas dan ringkas.\n\nTicket ID: ${ticket.ticket_id}\nKategori: ${ticket.category}\nJudul: ${ticket.title}\nDeskripsi: ${ticket.description}`;
+
+        const context = `Tiket serupa yang sudah diselesaikan:\n${similarTicketsSummary}\n\nSOP yang relevan:\n${relatedSOPs}`;
+
+        const response = await fetch('/api/maldevta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, context }),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data?.completion) {
+          setAnalysis((prev) => ({ ...prev, recommendedAnswer: data.data.completion }));
+        } else {
+          setError(data.error || 'Maldevta tidak merespons');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Gagal menghubungi Maldevta');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalysis();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket.ticket_id]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(analysis.recommendedAnswer);
@@ -54,7 +101,10 @@ export default function AIAssistant({ ticket, analysis, onUseAnswer }: Props) {
       <div className="flex-1 overflow-y-auto">
         {/* Ask button */}
         <div className="px-4 pt-4 pb-3">
-          <button className="w-full flex items-center justify-center gap-2 bg-violet-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-violet-700 transition-colors">
+          <button
+            onClick={() => setShowMaldevtaChat(true)}
+            className="w-full flex items-center justify-center gap-2 bg-violet-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-violet-700 transition-colors"
+          >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -83,25 +133,46 @@ export default function AIAssistant({ ticket, analysis, onUseAnswer }: Props) {
 
         {/* Recommended Answer */}
         <Section title="Rekomendasi Jawaban untuk User">
-          <div className="bg-violet-50 border border-violet-100 rounded-xl p-3 mb-3">
-            <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">
-              {showFullAnswer
-                ? analysis.recommendedAnswer
-                : previewLines.join('\n') + (hasMore ? '...' : '')}
-            </p>
-            {hasMore && (
-              <button
-                onClick={() => setShowFullAnswer((v) => !v)}
-                className="text-xs text-violet-600 font-medium mt-1.5 hover:underline"
-              >
-                {showFullAnswer ? 'Tampilkan lebih sedikit' : 'Tampilkan selengkapnya'}
-              </button>
-            )}
-          </div>
+          {loading ? (
+            <div className="bg-violet-50 border border-violet-100 rounded-xl p-3 mb-3 space-y-2 animate-pulse">
+              <div className="h-2.5 bg-violet-200 rounded w-full" />
+              <div className="h-2.5 bg-violet-200 rounded w-5/6" />
+              <div className="h-2.5 bg-violet-200 rounded w-4/6" />
+              <div className="h-2.5 bg-violet-200 rounded w-3/4 mt-1" />
+              <p className="text-[10px] text-violet-400 pt-1">Maldevta sedang menganalisis...</p>
+            </div>
+          ) : (
+            <>
+              {error && (
+                <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-2">
+                  <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  <span>Maldevta tidak tersedia — menampilkan analisis lokal. <span className="text-amber-500">({error})</span></span>
+                </div>
+              )}
+              <div className="bg-violet-50 border border-violet-100 rounded-xl p-3 mb-3">
+                <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">
+                  {showFullAnswer
+                    ? analysis.recommendedAnswer
+                    : previewLines.join('\n') + (hasMore ? '...' : '')}
+                </p>
+                {hasMore && (
+                  <button
+                    onClick={() => setShowFullAnswer((v) => !v)}
+                    className="text-xs text-violet-600 font-medium mt-1.5 hover:underline"
+                  >
+                    {showFullAnswer ? 'Tampilkan lebih sedikit' : 'Tampilkan selengkapnya'}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
           <div className="flex gap-2">
             <button
               onClick={handleCopy}
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {copied ? (
                 <>
@@ -121,7 +192,8 @@ export default function AIAssistant({ ticket, analysis, onUseAnswer }: Props) {
             </button>
             <button
               onClick={handleUseAnswer}
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-violet-600 py-2 rounded-lg hover:bg-violet-700 transition-colors"
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-violet-600 py-2 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -174,6 +246,8 @@ export default function AIAssistant({ ticket, analysis, onUseAnswer }: Props) {
 
         <div className="h-4" />
       </div>
+
+      <MaldevtaChatModal isOpen={showMaldevtaChat} onClose={() => setShowMaldevtaChat(false)} />
     </div>
   );
 }
