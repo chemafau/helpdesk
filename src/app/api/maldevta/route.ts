@@ -15,12 +15,28 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, context: context || '' }),
-      signal: AbortSignal.timeout(15000), // 15 second timeout
+      signal: AbortSignal.timeout(15000),
     });
 
     const data = await response.json();
 
-    return NextResponse.json(data);
+    if (!response.ok) {
+      return NextResponse.json(
+        { success: false, error: data.error || data.message || `HTTP ${response.status}` },
+        { status: response.status }
+      );
+    }
+
+    // Normalize: Maldevta may return { completion } directly or nested under data
+    const completion: string | undefined =
+      data.completion ?? data.data?.completion ?? data.response ?? data.text;
+
+    if (completion) {
+      return NextResponse.json({ success: true, data: { completion } });
+    }
+
+    // Unknown format — forward raw for debugging
+    return NextResponse.json({ success: false, error: 'Format respons tidak dikenali', raw: data });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(

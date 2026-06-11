@@ -14,10 +14,10 @@ export default function MaldevtaChatModal({ isOpen, onClose }: Props) {
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col" style={{ height: '90vh' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Tanya AI Assistant (Maldevta)</h2>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
+          <h2 className="font-semibold text-gray-900 text-sm">Tanya AI Assistant (Maldevta)</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
@@ -28,25 +28,15 @@ export default function MaldevtaChatModal({ isOpen, onClose }: Props) {
           </button>
         </div>
 
-        {/* Chat Embed */}
-        <div className="p-6 bg-gray-50 max-h-[70vh] overflow-auto">
+        {/* Chat Embed — fills remaining space */}
+        <div className="flex-1 overflow-hidden">
           <iframe
-            src="http://127.0.0.1:4513/embed?projectId=prj_bceff692e1284f81cda0&embedToken=prj_bceff692e1284f81cda0"
+            src="https://maldevta.com/embed?projectId=prj_1771551361146_poxgbm562&embedToken=prj_1771551361146_poxgbm562"
             width="100%"
-            height="500px"
+            height="100%"
             allow="microphone"
-            style={{ border: 'none', borderRadius: '8px' }}
+            style={{ border: 'none', display: 'block' }}
           />
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-100 bg-gray-50">
-          <button
-            onClick={onClose}
-            className="text-sm font-medium text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            Tutup
-          </button>
         </div>
       </div>
     </div>

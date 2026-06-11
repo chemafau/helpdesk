@@ -1,17 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Ticket, AIAnalysis } from '@/types';
+import { Ticket, AIAnalysis, Comment } from '@/types';
 import { getStatusColor } from '@/lib/utils';
 import MaldevtaChatModal from './MaldevtaChatModal';
 
 type Props = {
   ticket: Ticket;
   analysis: AIAnalysis;
+  allComments: Comment[];
   onUseAnswer?: (text: string) => void;
 };
 
-export default function AIAssistant({ ticket, analysis: initialAnalysis, onUseAnswer }: Props) {
+export default function AIAssistant({ ticket, analysis: initialAnalysis, allComments, onUseAnswer }: Props) {
   const [copied, setCopied] = useState(false);
   const [showFullAnswer, setShowFullAnswer] = useState(false);
   const [showMaldevtaChat, setShowMaldevtaChat] = useState(false);
@@ -28,14 +29,23 @@ export default function AIAssistant({ ticket, analysis: initialAnalysis, onUseAn
       setLoading(true);
 
       try {
-        const relatedSOPs = initialAnalysis.relatedSOPs.map((s) => `${s.title}: ${s.content}`).join('\n\n');
-        const similarTicketsSummary = initialAnalysis.similarTickets
-          .map((t) => `${t.ticket_id}: ${t.title} (${t.status})`)
-          .join('\n');
+        const relatedSOPs = initialAnalysis.relatedSOPs
+          .map((s) => `[${s.title}]: ${s.content}`)
+          .join('\n\n');
 
-        const prompt = `Kamu adalah AI assistant helpdesk. Analisis tiket berikut dan berikan rekomendasi jawaban dalam Bahasa Indonesia yang jelas dan ringkas.\n\nTicket ID: ${ticket.ticket_id}\nKategori: ${ticket.category}\nJudul: ${ticket.title}\nDeskripsi: ${ticket.description}`;
+        const similarTicketsWithHistory = initialAnalysis.similarTickets
+          .map((t) => {
+            const agentReplies = allComments
+              .filter((c) => c.ticket_id === t.ticket_id && c.sender_type === 'Agent')
+              .map((c) => c.message)
+              .join(' | ');
+            return `- ${t.ticket_id} (${t.status}): ${t.title}\n  Solusi agent: ${agentReplies || 'tidak tersedia'}`;
+          })
+          .join('\n\n');
 
-        const context = `Tiket serupa yang sudah diselesaikan:\n${similarTicketsSummary}\n\nSOP yang relevan:\n${relatedSOPs}`;
+        const prompt = `Kamu adalah agen helpdesk IT. Tulis balasan langsung kepada user yang mengajukan tiket berikut, dalam Bahasa Indonesia yang sopan dan profesional.\n\nFormat jawaban:\n- Mulai dengan sapaan "Halo, terima kasih telah menghubungi kami."\n- Tunjukkan empati terhadap masalah user\n- Berikan langkah-langkah solusi yang jelas dan terurut\n- Jika perlu data tambahan, minta di bagian akhir\n- Tutup dengan kalimat penutup yang ramah\n\nPENTING: Tulis teks biasa saja, JANGAN gunakan markdown (**, *, ##, ---). Ini adalah balasan email/chat langsung kepada user.\n\nTiket:\nID: ${ticket.ticket_id}\nKategori: ${ticket.category}\nJudul: ${ticket.title}\nDeskripsi: ${ticket.description}`;
+
+        const context = `Riwayat tiket serupa beserta solusinya:\n${similarTicketsWithHistory}\n\nSOP yang relevan:\n${relatedSOPs}`;
 
         const response = await fetch('/api/maldevta', {
           method: 'POST',
@@ -46,9 +56,17 @@ export default function AIAssistant({ ticket, analysis: initialAnalysis, onUseAn
         const data = await response.json();
 
         if (data.success && data.data?.completion) {
-          setAnalysis((prev) => ({ ...prev, recommendedAnswer: data.data.completion }));
+          const clean = data.data.completion
+            .replace(/\*\*(.*?)\*\*/g, '$1')   // bold
+            .replace(/\*(.*?)\*/g, '$1')        // italic
+            .replace(/^#{1,6}\s+/gm, '')        // headings
+            .replace(/^---+$/gm, '')            // horizontal rules
+            .replace(/^\s*[-–]\s{2,}/gm, '- ') // normalize list indent
+            .trim();
+          setAnalysis((prev) => ({ ...prev, recommendedAnswer: clean }));
         } else {
-          setError(data.error || 'Maldevta tidak merespons');
+          const detail = data.error || (data.raw ? JSON.stringify(data.raw).slice(0, 80) : 'Maldevta tidak merespons');
+          setError(detail);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Gagal menghubungi Maldevta');

@@ -133,6 +133,7 @@ export default function HomePage() {
                   <AIAssistant
                     ticket={selectedTicket}
                     analysis={aiAnalysis}
+                    allComments={allComments}
                     onUseAnswer={handleUseAnswer}
                   />
                 </>
