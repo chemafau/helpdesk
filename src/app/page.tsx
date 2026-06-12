@@ -14,6 +14,7 @@ import TicketList from '@/components/TicketList';
 import TicketDetail from '@/components/TicketDetail';
 import AIAssistant from '@/components/AIAssistant';
 import NewTicketModal from '@/components/NewTicketModal';
+import KnowledgeBaseView from '@/components/KnowledgeBase';
 
 type FilterTab = TicketStatus | 'all';
 
@@ -109,6 +110,8 @@ export default function HomePage() {
         <main className="flex flex-1 overflow-hidden">
           {activePage === 'dashboard' ? (
             <DashboardView tickets={tickets} />
+          ) : activePage === 'knowledge-base' ? (
+            <KnowledgeBaseView />
           ) : (
             <>
               <TicketList

@@ -358,4 +358,217 @@ Jika user tidak bisa mengakses fitur/menu/data tertentu:
    - Semua perubahan akses harus terdokumentasi
    - Review akses secara berkala`,
   },
+  {
+    id: 11,
+    title: 'SOP Perangkat Hardware Bermasalah',
+    category: 'Hardware',
+    tags: ['hardware', 'perangkat', 'rusak', 'tidak berfungsi', 'printer', 'laptop', 'komputer'],
+    content: `SOP Penanganan Perangkat Hardware Bermasalah
+
+Jika user melaporkan perangkat hardware tidak berfungsi normal:
+
+1. Identifikasi Perangkat dan Gejala
+   - Jenis perangkat: laptop, PC, printer, monitor, keyboard, mouse, dll
+   - Gejala spesifik: tidak menyala, error, suara aneh, panas berlebih
+   - Sejak kapan masalah terjadi dan apakah ada kejadian sebelumnya
+
+2. Troubleshoot Awal (Remote)
+   - Restart perangkat
+   - Cabut dan pasang kembali semua kabel dan koneksi
+   - Update driver perangkat melalui Device Manager
+   - Jalankan Windows Troubleshooter jika tersedia
+   - Cek Event Viewer untuk error log hardware
+
+3. Untuk Printer
+   - Hapus print queue yang stuck
+   - Restart Print Spooler service (services.msc)
+   - Reinstall driver printer
+   - Cek tinta/toner dan kertas tidak macet
+
+4. Untuk Laptop/PC Tidak Menyala
+   - Pastikan adaptor/kabel power tersambung dengan benar
+   - Coba charger/kabel lain
+   - Lepas baterai (jika bisa), tunggu 30 detik, pasang kembali
+   - Cek lampu indikator daya
+
+5. Overheating
+   - Bersihkan ventilasi dari debu
+   - Gunakan cooling pad
+   - Periksa thermal paste jika CPU suhu sangat tinggi
+
+6. Eskalasi ke Teknisi Lapangan
+   - Jika masalah tidak bisa diselesaikan remote, buat jadwal kunjungan teknisi
+   - Siapkan: nomor aset perangkat, lokasi user, deskripsi masalah detail`,
+  },
+  {
+    id: 12,
+    title: 'SOP Email Tidak Terkirim atau Tidak Masuk',
+    category: 'Email',
+    tags: ['email', 'tidak terkirim', 'tidak masuk', 'spam', 'outlook', 'mail'],
+    content: `SOP Penanganan Masalah Email
+
+Jika user mengalami masalah pengiriman atau penerimaan email:
+
+1. Identifikasi Masalah
+   - Email tidak bisa dikirim / bounced back
+   - Email tidak masuk ke inbox
+   - Email masuk ke folder spam
+   - Tidak bisa login ke email client
+
+2. Email Tidak Bisa Dikirim
+   - Cek pesan bounce / error yang diterima pengirim
+   - Verifikasi alamat email tujuan sudah benar
+   - Pastikan ukuran attachment tidak melebihi batas (biasanya 25MB)
+   - Cek apakah akun SMTP belum mencapai limit pengiriman harian
+   - Verifikasi konfigurasi SMTP (host, port, SSL/TLS, autentikasi)
+
+3. Email Tidak Masuk
+   - Cek folder Spam / Junk terlebih dahulu
+   - Periksa aturan filter/rules yang mungkin memindahkan email
+   - Verifikasi kapasitas mailbox tidak penuh (biasanya 50GB)
+   - Cek apakah pengirim di-block atau masuk blacklist
+   - Verifikasi MX record domain masih valid
+
+4. Masalah di Mail Client (Outlook, Thunderbird)
+   - Cek koneksi internet
+   - Verifikasi setting IMAP/POP3 dan SMTP
+   - Rebuild Outlook profile jika korup
+   - Update mail client ke versi terbaru
+
+5. Konfigurasi Keamanan Email
+   - Periksa SPF record: pastikan server pengirim tercantum
+   - DKIM: pastikan signature email valid
+   - DMARC: cek policy tidak terlalu strict memblokir email legitimate
+
+6. Eskalasi
+   - Masalah konfigurasi DNS/MX record: eskalasi ke tim Infrastruktur
+   - Masalah mail server down: eskalasi ke tim Server`,
+  },
+  {
+    id: 13,
+    title: 'SOP Sistem Lambat / Performa Menurun',
+    category: 'Performance',
+    tags: ['lambat', 'lemot', 'performance', 'performa', 'loading', 'hang', 'freeze'],
+    content: `SOP Penanganan Sistem Lambat / Performa Menurun
+
+Jika user melaporkan aplikasi atau sistem berjalan lambat:
+
+1. Identifikasi Ruang Lingkup Masalah
+   - Apakah lambat pada semua user atau hanya user tertentu?
+   - Apakah lambat pada semua fitur atau fitur tertentu saja?
+   - Kapan mulai terjadi? Apakah bertepatan dengan deployment atau perubahan?
+
+2. Troubleshoot Sisi Client
+   - Restart browser dan clear cache (Ctrl+Shift+Del)
+   - Tutup tab dan aplikasi lain yang tidak digunakan
+   - Cek penggunaan RAM dan CPU di Task Manager
+   - Restart komputer user
+   - Coba akses dari perangkat / jaringan berbeda
+
+3. Cek Koneksi Jaringan
+   - Test kecepatan internet (speedtest.net)
+   - Ping server aplikasi untuk cek latency
+   - Cek apakah jaringan sedang padat (jam sibuk)
+
+4. Monitoring Sisi Server
+   - Monitor CPU, RAM, Disk I/O server aplikasi secara real-time
+   - Cek jumlah concurrent user yang sedang aktif
+   - Identifikasi proses yang mengkonsumsi resource berlebihan
+   - Cek log aplikasi untuk error atau warning
+
+5. Investigasi Database
+   - Cek query yang berjalan lama (slow query log)
+   - Periksa index database apakah masih optimal
+   - Monitor koneksi database aktif
+   - Pertimbangkan query caching
+
+6. Tindakan Pemulihan
+   - Restart aplikasi service jika response time sangat buruk
+   - Kill proses runaway yang mengkonsumsi resource berlebihan
+   - Aktifkan mode maintenance jika perlu perbaikan menyeluruh
+   - Scaling horizontal/vertikal jika beban melebihi kapasitas
+
+7. Pencegahan
+   - Lakukan load testing sebelum deployment ke production
+   - Pasang monitoring dan alerting (CPU > 80%, RAM > 85%)
+   - Jadwalkan maintenance rutin di luar jam kerja`,
+  },
+  {
+    id: 14,
+    title: 'SOP Permintaan Akses Sistem Baru',
+    category: 'Access',
+    tags: ['akses baru', 'onboarding', 'request akses', 'user baru', 'aktivasi'],
+    content: `SOP Permintaan Akses Sistem Baru
+
+Prosedur untuk user yang membutuhkan akses ke sistem atau aplikasi baru:
+
+1. Penerimaan Request
+   - Terima permintaan melalui tiket helpdesk
+   - Pastikan request mencantumkan: nama user, NIP/NIK, departemen, sistem yang diminta, alasan kebutuhan
+
+2. Verifikasi dan Persetujuan
+   - Konfirmasi identitas user
+   - Minta persetujuan atasan langsung via email atau tanda tangan form
+   - Cek apakah akses yang diminta sesuai dengan job description user
+   - Untuk akses sensitif (keuangan, HR), diperlukan persetujuan manager dan IT Security
+
+3. Provisioning Akses
+   - Buat akun di sistem yang diminta jika belum ada
+   - Assign role minimum yang dibutuhkan (principle of least privilege)
+   - Set password sementara dan aktifkan wajib ganti password saat pertama login
+   - Daftarkan MFA jika sistem mendukung
+
+4. Notifikasi User
+   - Kirim email ke user berisi: username, password sementara, panduan login pertama
+   - Sertakan link dokumentasi atau panduan penggunaan sistem
+
+5. Dokumentasi
+   - Catat di log akses: siapa diberi akses ke sistem apa, kapan, siapa yang menyetujui
+   - Update tiket menjadi Resolved setelah user konfirmasi bisa akses
+
+6. Review Berkala
+   - Akses direview setiap 6 bulan
+   - Akses dicabut otomatis jika user resign atau pindah departemen`,
+  },
+  {
+    id: 15,
+    title: 'SOP Backup dan Recovery Data',
+    category: 'Database',
+    tags: ['backup', 'recovery', 'restore', 'data hilang', 'database'],
+    content: `SOP Backup dan Recovery Data
+
+Prosedur penanganan jika data hilang atau perlu restore:
+
+1. Identifikasi Data yang Bermasalah
+   - Data apa yang hilang atau perlu di-restore?
+   - Kapan terakhir data dalam kondisi normal?
+   - Apa penyebab data hilang (terhapus tidak sengaja, corrupt, dll)?
+
+2. Jangan Panik — Hentikan Operasi Dulu
+   - Jangan menulis data baru ke storage yang sama
+   - Jangan coba perbaiki sendiri tanpa backup
+   - Segera hubungi tim IT / DBA
+
+3. Cek Backup yang Tersedia
+   - Backup harian: tersedia untuk 7 hari terakhir
+   - Backup mingguan: tersedia untuk 4 minggu terakhir
+   - Backup bulanan: tersedia untuk 3 bulan terakhir
+   - Lokasi backup: server backup di /backup/ atau cloud storage
+
+4. Proses Restore
+   - Identifikasi backup terdekat sebelum data hilang
+   - Test restore di environment staging dulu sebelum production
+   - Koordinasikan jadwal restore dengan tim terdampak (ada downtime)
+   - Lakukan restore di luar jam kerja jika memungkinkan
+
+5. Verifikasi Setelah Restore
+   - Validasi integritas data setelah restore
+   - Minta user mengkonfirmasi data sudah kembali normal
+   - Jalankan consistency check pada database
+
+6. Post-Recovery
+   - Dokumentasikan insiden: penyebab, data yang hilang, waktu recovery
+   - Evaluasi frekuensi dan metode backup
+   - Pertimbangkan implementasi Point-in-Time Recovery (PITR)`,
+  },
 ];
